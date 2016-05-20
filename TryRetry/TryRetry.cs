@@ -43,7 +43,7 @@ namespace TryRetry
                 finally
                 {
                     numTries++;
-                    if (millisecondsDelay > 0 && numTries < maxTries)
+                    if (millisecondsDelay > 0 && numTries <= maxTries)
                         System.Threading.Thread.Sleep(millisecondsDelay);
                 }
             }
