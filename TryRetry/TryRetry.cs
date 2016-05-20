@@ -38,7 +38,7 @@ namespace TryRetry
                 }
                 catch (TException)
                 {
-                    result = catchFunc();
+                    if (catchFunc != null) result = catchFunc();
                 }
                 finally
                 {
