@@ -48,17 +48,6 @@ namespace TryRetryTest
         }
 
         /// <summary>
-        /// Test for the right exception.
-        /// </summary>
-        [TestMethod]
-        public void RightException()
-        {
-            int result = TryRetry<int>.Retry<IndexOutOfRangeException>(
-                () => Looper(),
-                Catcher);
-        }
-
-        /// <summary>
         /// Test for a failed attempt despite retrying.
         /// </summary>
         [TestMethod]
