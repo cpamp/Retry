@@ -64,13 +64,11 @@ namespace TryRetry
                 {
                     result = HandleException(e, exCatch);
                 }
-                finally
+
+                numTries++;
+                if (millisecondsDelay > 0 && numTries <= maxTries)
                 {
-                    numTries++;
-                    if (millisecondsDelay > 0 && numTries <= maxTries)
-                    {
-                        System.Threading.Thread.Sleep(millisecondsDelay);
-                    }
+                    System.Threading.Thread.Sleep(millisecondsDelay);
                 }
             }
 
