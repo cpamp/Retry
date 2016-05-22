@@ -16,7 +16,7 @@ namespace TryRetry
         /// Handles exceptions thrown
         /// </summary>
         /// <param name="e">The <see cref="Exception"/> thrown.</param>
-        /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> 
+        /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
         /// as key and <see cref="Func{TResult}"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <returns>Result of catch function.</returns>
         private static TResult HandleException(Exception e, IDictionary<Type, Func<TResult>> exCatch)
