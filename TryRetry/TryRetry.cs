@@ -51,7 +51,7 @@ namespace TryRetry
         {
             TResult result = default(TResult);
             int numTries = 0;
-            maxTries = maxTries < 0 ? 1 : maxTries;
+            maxTries = Math.Max(maxTries, 1);
 
             while (numTries <= maxTries)
             {
