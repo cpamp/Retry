@@ -14,7 +14,7 @@ namespace TryRetryTest
         /// </summary>
         /// <param name="fail">Whether the loop should throw <see cref="IndexOutOfRangeException"/> or not.</param>
         /// <returns>Returns 0 on pass.</returns>
-        private int looper(bool fail = true)
+        private int Looper(bool fail = true)
         {
             TestContext.WriteLine("Looper");
             int[] arr = { 1, 2 };
@@ -29,7 +29,7 @@ namespace TryRetryTest
         /// Method for catching exceptions.
         /// </summary>
         /// <returns>Returns 1 on catch.</returns>
-        private int catcher()
+        private int Catcher()
         {
             TestContext.WriteLine("Catcher");
             return -1;
@@ -43,8 +43,8 @@ namespace TryRetryTest
         public void WrongException()
         {
             TryRetry<int>.Retry<NullReferenceException>(
-                () => looper(),
-                catcher);
+                () => Looper(),
+                Catcher);
         }
 
         /// <summary>
@@ -54,8 +54,8 @@ namespace TryRetryTest
         public void RightException()
         {
             int result = TryRetry<int>.Retry<IndexOutOfRangeException>(
-                () => looper(),
-                catcher);
+                () => Looper(),
+                Catcher);
         }
 
         /// <summary>
@@ -65,8 +65,8 @@ namespace TryRetryTest
         public void Failed()
         {
             int result = TryRetry<int>.Retry<IndexOutOfRangeException>(
-                () => looper(),
-                catcher);
+                () => Looper(),
+                Catcher);
             Assert.AreEqual<int>(-1, result);
         }
 
@@ -77,8 +77,8 @@ namespace TryRetryTest
         public void Passed()
         {
             int result = TryRetry<int>.Retry<IndexOutOfRangeException>(
-                () => looper(false),
-                catcher);
+                () => Looper(false),
+                Catcher);
             Assert.AreEqual<int>(1, result);
         }
     }
