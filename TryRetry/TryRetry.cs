@@ -13,6 +13,32 @@ namespace TryRetry
     public static class TryRetry<TResult>
     {
         /// <summary>
+        /// Handles exceptions thrown
+        /// </summary>
+        /// <param name="e">The <see cref="Exception"/> thrown.</param>
+        /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
+        /// as key and <see cref="Func{TResult}"/> to invoke for that <see cref="Exception"/> as value.</param>
+        /// <returns>Result of catch function.</returns>
+        private static TResult HandleException(Exception e, IDictionary<Type, Func<TResult>> exCatch)
+        {
+            TResult result = default(TResult);
+            bool handled = false;
+
+            foreach (var ec in exCatch)
+            {
+                if (e.GetType() == ec.Key)
+                {
+                    if (ec.Value != null) { result = ec.Value.Invoke(); }
+                    handled = true;
+                    break;
+                }
+            }
+
+            if (!handled) throw e;
+            return result;
+        }
+
+        /// <summary>
         /// Try, catch, then retry (n) times until max tries reached, an unexpected exception is thrown, 
         /// or try block executes without an exception.
         /// </summary>
@@ -38,7 +64,7 @@ namespace TryRetry
         /// </summary>
         /// <typeparam name="TException">Expected <see cref="Exception"/> to handle.</typeparam>
         /// <param name="tryFunc">Try code block to execute.</param>
-        /// <param name="exCatch">Dictionary containing expected <see cref="Exception"/> <see cref="Type"/> 
+        /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
         /// as key and <see cref="Func{TResult}"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
@@ -47,13 +73,11 @@ namespace TryRetry
             int maxTries = 1, int millisecondsDelay = 0)
         {
             TResult result = default(TResult);
-            bool handled = false;
             int numTries = 0;
             maxTries = maxTries < 0 ? 1 : maxTries;
 
             while (numTries <= maxTries)
             {
-                handled = false;
                 try
                 {
                     result = tryFunc();
@@ -61,17 +85,7 @@ namespace TryRetry
                 }
                 catch (Exception e)
                 {
-                    foreach (var ec in exCatch)
-                    {
-                        if (e.GetType() == ec.Key)
-                        {
-                            if (ec.Value != null) { result = ec.Value.Invoke(); }
-                            handled = true;
-                            break;
-                        }
-                    }
-
-                    if (!handled) throw e;
+                    HandleException(e, exCatch);
                 }
                 finally
                 {
