@@ -22,7 +22,7 @@ namespace TryRetryTest
             {
                 int j = arr[i];
             }
-            return 0;
+            return 1;
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace TryRetryTest
         private int catcher()
         {
             TestContext.WriteLine("Catcher");
-            return 1;
+            return -1;
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace TryRetryTest
             int result = TryRetry<int>.Retry<IndexOutOfRangeException>(
                 () => looper(),
                 catcher);
-            Assert.AreEqual<int>(1, result);
+            Assert.AreEqual<int>(-1, result);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace TryRetryTest
             int result = TryRetry<int>.Retry<IndexOutOfRangeException>(
                 () => looper(false),
                 catcher);
-            Assert.AreEqual<int>(0, result);
+            Assert.AreEqual<int>(1, result);
         }
     }
 }
