@@ -40,7 +40,6 @@ namespace TryRetry
         /// Try, catch, then retry (n) times until max tries reached, an unexpected exception is thrown, 
         /// or try block executes without an exception.
         /// </summary>
-        /// <typeparam name="TException">Expected <see cref="Exception"/> to handle.</typeparam>
         /// <param name="tryFunc">Try code block to execute.</param>
         /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
         /// as key and <see cref="Func{TResult}"/> to invoke for that <see cref="Exception"/> as value.</param>
@@ -102,7 +101,6 @@ namespace TryRetry
         /// Try, catch, then retry (n) times until max tries reached, an unexpected exception is thrown, 
         /// or try block executes without an exception.
         /// </summary>
-        /// <typeparam name="TException">Expected <see cref="Exception"/> to handle.</typeparam>
         /// <param name="tryFunc">Try code block to execute.</param>
         /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
         /// as key and <see cref="Func{TResult}"/> to invoke for that <see cref="Exception"/> as value.</param>
@@ -119,12 +117,11 @@ namespace TryRetry
         /// Try, catch, then retry (n) times asynchronously until max tries reached, an unexpected exception is thrown, 
         /// or try block executes without an exception.
         /// </summary>
-        /// <typeparam name="TException">Expected <see cref="Exception"/> to handle.</typeparam>
         /// <param name="tryFunc">Try code block to execute.</param>
         /// <param name="catchFunc">Catch code block to execute.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
-        /// <returns>tryFunc return value or catchFunc return value.</returns>
+        /// <returns>Task</returns>
         public static async Task<TResult> RetryAsync<TException>(Func<TResult> tryFunc, Func<TResult> catchFunc = null,
             int maxTries = 1, int millisecondsDelay = 0) where TException : Exception, new()
         {
@@ -139,13 +136,12 @@ namespace TryRetry
         /// Try, catch, then retry (n) times asynchronously until max tries reached, an unexpected exception is thrown, 
         /// or try block executes without an exception.
         /// </summary>
-        /// <typeparam name="TException">Expected <see cref="Exception"/> to handle.</typeparam>
         /// <param name="tryFunc">Try code block to execute.</param>
         /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
         /// as key and <see cref="Func{TResult}"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
-        /// <returns>tryFunc return value or catchFunc return value.</returns>
+        /// <returns>Task</returns>
         public static async Task<TResult> RetryAsync(Func<TResult> tryFunc, IDictionary<Type, Func<TResult>> exCatch,
             int maxTries = 1, int millisecondsDelay = 0)
         {
