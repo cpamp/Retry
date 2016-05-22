@@ -38,12 +38,12 @@ namespace TryRetry
         /// </summary>
         /// <typeparam name="TException">Expected <see cref="Exception"/> to handle.</typeparam>
         /// <param name="tryFunc">Try code block to execute.</param>
-        /// <param name="exCatch">Dictionary containing expected <see cref="Exception"/> <see cref="Type"/> 
+        /// <param name="exceptionCatch">Dictionary containing expected <see cref="Exception"/> <see cref="Type"/> 
         /// as key and <see cref="Func{TResult}"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
-        public static TResult Retry(Func<TResult> tryFunc, IDictionary<Type, Func<TResult>> exCatch,
+        public static TResult Retry(Func<TResult> tryFunc, IDictionary<Type, Func<TResult>> exceptionCatch,
             int maxTries = 1, int millisecondsDelay = 0)
         {
             TResult result = default(TResult);
@@ -61,7 +61,7 @@ namespace TryRetry
                 }
                 catch (Exception e)
                 {
-                    foreach (var ec in exCatch)
+                    foreach (var ec in exceptionCatch)
                     {
                         if (e.GetType() == ec.Key)
                         {
