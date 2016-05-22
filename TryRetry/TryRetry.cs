@@ -63,7 +63,7 @@ namespace TryRetry
                 }
                 catch (Exception e)
                 {
-                    HandleException(e, exCatch);
+                    result = HandleException(e, exCatch);
                 }
                 finally
                 {
