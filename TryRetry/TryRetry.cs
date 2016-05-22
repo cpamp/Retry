@@ -116,7 +116,7 @@ namespace TryRetry
         }
 
         /// <summary>
-        /// Try, catch, then retry (n) times until max tries reached, an unexpected exception is thrown, 
+        /// Try, catch, then retry (n) times asynchronously until max tries reached, an unexpected exception is thrown, 
         /// or try block executes without an exception.
         /// </summary>
         /// <typeparam name="TException">Expected <see cref="Exception"/> to handle.</typeparam>
@@ -136,7 +136,7 @@ namespace TryRetry
         }
 
         /// <summary>
-        /// Try, catch, then retry (n) times until max tries reached, an unexpected exception is thrown, 
+        /// Try, catch, then retry (n) times asynchronously until max tries reached, an unexpected exception is thrown, 
         /// or try block executes without an exception.
         /// </summary>
         /// <typeparam name="TException">Expected <see cref="Exception"/> to handle.</typeparam>
