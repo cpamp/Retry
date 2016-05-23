@@ -13,7 +13,7 @@ namespace TryRetry
         /// <summary>
         /// Delegate for catch block function.
         /// </summary>
-        /// <param name="e">Exception that is being handled</param>
+        /// <param name="e">Exception that is being handled.</param>
         /// <returns>TResult</returns>
         public delegate TResult CatchFunc(Exception e);
 
@@ -22,7 +22,7 @@ namespace TryRetry
         /// </summary>
         /// <param name="e">The <see cref="Exception"/> thrown.</param>
         /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
-        /// as key and <see cref="Func{TResult}"/> to invoke for that <see cref="Exception"/> as value.</param>
+        /// as key and <see cref="CatchFunc"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <returns>Result of catch function.</returns>
         private static TResult HandleException(Exception e, IDictionary<Type, CatchFunc> exCatch)
         {
@@ -53,7 +53,7 @@ namespace TryRetry
         /// </summary>
         /// <param name="tryFunc">Try code block to execute.</param>
         /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
-        /// as key and <see cref="Func{TResult}"/> to invoke for that <see cref="Exception"/> as value.</param>
+        /// as key and <see cref="CatchFunc"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
@@ -112,7 +112,7 @@ namespace TryRetry
         /// </summary>
         /// <param name="tryFunc">Try code block to execute.</param>
         /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
-        /// as key and <see cref="Func{TResult}"/> to invoke for that <see cref="Exception"/> as value.</param>
+        /// as key and <see cref="CatchFunc"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
