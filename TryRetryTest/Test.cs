@@ -1,6 +1,7 @@
 ﻿using System;
 using TryRetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Data.SqlClient;
 
 namespace TryRetryTest
 {
@@ -14,13 +15,12 @@ namespace TryRetryTest
         /// </summary>
         /// <param name="fail">Whether the loop should throw <see cref="IndexOutOfRangeException"/> or not.</param>
         /// <returns>Returns 0 on pass.</returns>
-        private int Looper(bool fail = true)
+        private int Thrower(bool fail = true)
         {
             TestContext.WriteLine("Looper");
-            int[] arr = { 1, 2 };
-            for (int i = 0; fail; i++)
-            {
-                int j = arr[i];
+            if (fail) {
+                SqlConnection conn = new SqlConnection(@"Connection Timeout=1");
+                conn.Open();
             }
             return 1;
         }
@@ -29,9 +29,11 @@ namespace TryRetryTest
         /// Method for catching exceptions.
         /// </summary>
         /// <returns>Returns 1 on catch.</returns>
-        private int Catcher()
+        private int Catcher(Exception e)
         {
             TestContext.WriteLine("Catcher");
+            SqlException sEx = (SqlException)e;
+            TestContext.WriteLine(sEx.Number.ToString());
             return -1;
         }
 
@@ -39,11 +41,11 @@ namespace TryRetryTest
         /// Test for the wrong exception.
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(System.IndexOutOfRangeException))]
+        [ExpectedException(typeof(SqlException))]
         public void WrongException()
         {
             TryRetry<int>.Retry<NullReferenceException>(
-                () => Looper(),
+                () => Thrower(),
                 Catcher);
         }
 
@@ -53,8 +55,8 @@ namespace TryRetryTest
         [TestMethod]
         public void Failed()
         {
-            int result = TryRetry<int>.Retry<IndexOutOfRangeException>(
-                () => Looper(),
+            int result = TryRetry<int>.Retry<SqlException>(
+                () => Thrower(),
                 Catcher);
             Assert.AreEqual<int>(-1, result);
         }
@@ -65,8 +67,8 @@ namespace TryRetryTest
         [TestMethod]
         public void Passed()
         {
-            int result = TryRetry<int>.Retry<IndexOutOfRangeException>(
-                () => Looper(false),
+            int result = TryRetry<int>.Retry<SqlException>(
+                () => Thrower(false),
                 Catcher);
             Assert.AreEqual<int>(1, result);
         }
