@@ -97,11 +97,11 @@ namespace TryRetry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
         public static TResult Retry<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
-            int maxTries = 1, int millisecondsDelay = 0) where TException : Exception, new()
+            int maxTries = 1, int millisecondsDelay = 0) where TException : Exception
         {
             return RetryLoop(
                 tryFunc,
-                new Dictionary<Type, CatchFunc>(){ { new TException().GetType(), catchFunc } },
+                new Dictionary<Type, CatchFunc>(){ { typeof(TException), catchFunc } },
                 maxTries,
                 millisecondsDelay);
         }
@@ -132,11 +132,11 @@ namespace TryRetry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>Task</returns>
         public static async Task<TResult> RetryAsync<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
-            int maxTries = 1, int millisecondsDelay = 0) where TException : Exception, new()
+            int maxTries = 1, int millisecondsDelay = 0) where TException : Exception
         {
             return await Task.Run(() => RetryLoop(
                 tryFunc,
-                new Dictionary<Type, CatchFunc>() { { new TException().GetType(), catchFunc } },
+                new Dictionary<Type, CatchFunc>() { { typeof(TException), catchFunc } },
                 maxTries,
                 millisecondsDelay));
         }
