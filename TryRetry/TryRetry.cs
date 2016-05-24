@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace TryRetry
+namespace Retry
 {
     /// <summary>
     /// Class for simulating Try, Catch, Retry (n) times.
     /// </summary>
     /// <typeparam name="TResult">Type to be returned.</typeparam>
-    public static class TryRetry<TResult>
+    public static class Retry<TResult>
     {
         /// <summary>
         /// Delegate for catch block function.
@@ -115,7 +115,7 @@ namespace TryRetry
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
-        private static TResult RetryLoop(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
+        private static TResult RunRetry(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
             int maxTries = 1, int millisecondsDelay = 0)
         {
             TResult result = default(TResult);
@@ -154,14 +154,14 @@ namespace TryRetry
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
-        public static TResult Retry<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
+        public static TResult Run<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
             int maxTries = 1, int millisecondsDelay = 0, string id = null) where TException : Exception
         {
             TResult result = default(TResult);
 
             if (CanRun(id))
             {
-                result = RetryLoop(
+                result = RunRetry(
                 tryFunc,
                 new Dictionary<Type, CatchFunc>() { { typeof(TException), catchFunc } },
                 maxTries,
@@ -181,14 +181,14 @@ namespace TryRetry
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
-        public static TResult Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
+        public static TResult Run(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
             int maxTries = 1, int millisecondsDelay = 0, string id = null)
         {
             TResult result = default(TResult);
 
             if (CanRun(id))
             {
-                result = RetryLoop(tryFunc, exCatch, maxTries, millisecondsDelay);
+                result = RunRetry(tryFunc, exCatch, maxTries, millisecondsDelay);
             }
 
             return result;
@@ -203,14 +203,14 @@ namespace TryRetry
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>Task</returns>
-        public static async Task<TResult> RetryAsync<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
+        public static async Task<TResult> RunAsync<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
             int maxTries = 1, int millisecondsDelay = 0, string id = null) where TException : Exception
         {
             TResult result = default(TResult);
 
             if (CanRun(id))
             {
-                result = await Task.Run(() => RetryLoop(
+                result = await Task.Run(() => RunRetry(
                 tryFunc,
                 new Dictionary<Type, CatchFunc>() { { typeof(TException), catchFunc } },
                 maxTries,
@@ -230,14 +230,14 @@ namespace TryRetry
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>Task</returns>
-        public static async Task<TResult> RetryAsync(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
+        public static async Task<TResult> RunAsync(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
             int maxTries = 1, int millisecondsDelay = 0, string id = null)
         {
             TResult result = default(TResult);
 
             if (CanRun(id))
             {
-                result = await Task.Run(() => RetryLoop(tryFunc, exCatch, maxTries, millisecondsDelay));
+                result = await Task.Run(() => RunRetry(tryFunc, exCatch, maxTries, millisecondsDelay));
             }
 
             return result;

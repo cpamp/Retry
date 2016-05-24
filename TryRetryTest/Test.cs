@@ -17,7 +17,7 @@ namespace TryRetryTest
         /// <returns>Returns 0 on pass.</returns>
         private int Thrower(bool fail = true)
         {
-            TestContext.WriteLine("Looper");
+            TestContext.WriteLine("Thrower");
             if (fail) {
                 SqlConnection conn = new SqlConnection(@"Connection Timeout=1");
                 conn.Open();
@@ -71,6 +71,21 @@ namespace TryRetryTest
                 () => Thrower(false),
                 Catcher);
             Assert.AreEqual<int>(1, result);
+        }
+
+        /// <summary>
+        /// Test tryonce case with id
+        /// </summary>
+        [TestMethod]
+        public void RunOnce()
+        {
+            TryRetry<int>.Retry<SqlException>(
+                () => Thrower(),
+                Catcher, 1, 0, "Test");
+            int result = TryRetry<int>.Retry<SqlException>(
+                () => Thrower(),
+                Catcher, 1, 0, "Test");
+            Assert.AreEqual<int>(0, result);
         }
     }
 }
