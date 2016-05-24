@@ -1,5 +1,5 @@
 ﻿using System;
-using TryRetry;
+using Retry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.SqlClient;
 
@@ -44,7 +44,7 @@ namespace TryRetryTest
         [ExpectedException(typeof(SqlException))]
         public void WrongException()
         {
-            TryRetry<int>.Retry<NullReferenceException>(
+            Retry<int>.Run<NullReferenceException>(
                 () => Thrower(),
                 Catcher);
         }
@@ -55,7 +55,7 @@ namespace TryRetryTest
         [TestMethod]
         public void Failed()
         {
-            int result = TryRetry<int>.Retry<SqlException>(
+            int result = Retry<int>.Run<SqlException>(
                 () => Thrower(),
                 Catcher);
             Assert.AreEqual<int>(-1, result);
@@ -67,7 +67,7 @@ namespace TryRetryTest
         [TestMethod]
         public void Passed()
         {
-            int result = TryRetry<int>.Retry<SqlException>(
+            int result = Retry<int>.Run<SqlException>(
                 () => Thrower(false),
                 Catcher);
             Assert.AreEqual<int>(1, result);
@@ -79,10 +79,10 @@ namespace TryRetryTest
         [TestMethod]
         public void RunOnce()
         {
-            TryRetry<int>.Retry<SqlException>(
+            Retry<int>.Run<SqlException>(
                 () => Thrower(),
                 Catcher, 1, 0, "Test");
-            int result = TryRetry<int>.Retry<SqlException>(
+            int result = Retry<int>.Run<SqlException>(
                 () => Thrower(),
                 Catcher, 1, 0, "Test");
             Assert.AreEqual<int>(0, result);
