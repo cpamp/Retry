@@ -153,6 +153,7 @@ namespace Retry
         /// <param name="catchFunc">Catch code block to execute.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
+        /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
         public static TResult Run<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
             int maxTries = 1, int millisecondsDelay = 0, string id = null) where TException : Exception
@@ -180,6 +181,7 @@ namespace Retry
         /// as key and <see cref="CatchFunc"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
+        /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
         public static TResult Run(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
             int maxTries = 1, int millisecondsDelay = 0, string id = null)
@@ -202,6 +204,7 @@ namespace Retry
         /// <param name="catchFunc">Catch code block to execute.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
+        /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>Task</returns>
         public static async Task<TResult> RunAsync<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
             int maxTries = 1, int millisecondsDelay = 0, string id = null) where TException : Exception
@@ -229,6 +232,7 @@ namespace Retry
         /// as key and <see cref="Func{TResult}"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
+        /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>Task</returns>
         public static async Task<TResult> RunAsync(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
             int maxTries = 1, int millisecondsDelay = 0, string id = null)
