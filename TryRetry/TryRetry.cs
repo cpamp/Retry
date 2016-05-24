@@ -18,6 +18,64 @@ namespace TryRetry
         public delegate TResult CatchFunc(Exception e);
 
         /// <summary>
+        /// Lock
+        /// </summary>
+        private static readonly Object thisLock = new Object();
+        
+        /// <summary>
+        /// Collection of Id's that can only be ran once
+        /// </summary>
+        private static HashSet<String> runOnceIds = new HashSet<string>();
+
+        /// <summary>
+        /// Check if retry can only be ran once and add to runOnceIds collection.
+        /// </summary>
+        /// <param name="id">Id of Retry</param>
+        /// <returns>True if can run, false if cannot run.</returns>
+        private static bool CanRun(string id)
+        {
+            bool result = true;
+
+            lock (thisLock)
+            {
+                if (id != null && runOnceIds.Contains(id))
+                {
+                    result = false;
+                }
+                else if (id != null)
+                {
+                    runOnceIds.Add(id);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Removes an id from the RunOnce collection, allowing it to run again.
+        /// </summary>
+        /// <param name="id">Id to remove</param>
+        public static void RemoveId(string id)
+        {
+            lock (thisLock)
+            {
+                runOnceIds.Remove(id);
+            }
+        }
+
+        /// <summary>
+        /// Adds an id to the RunOnce collection, preventing it from being ran again.
+        /// </summary>
+        /// <param name="id">Id to add.</param>
+        public static void AddId(string id)
+        {
+            lock (thisLock)
+            {
+                runOnceIds.Add(id);
+            }
+        }
+
+        /// <summary>
         /// Handles exceptions thrown
         /// </summary>
         /// <param name="e">The <see cref="Exception"/> thrown.</param>
@@ -97,13 +155,20 @@ namespace TryRetry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
         public static TResult Retry<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
-            int maxTries = 1, int millisecondsDelay = 0) where TException : Exception
+            int maxTries = 1, int millisecondsDelay = 0, string id = null) where TException : Exception
         {
-            return RetryLoop(
+            TResult result = default(TResult);
+
+            if (CanRun(id))
+            {
+                result = RetryLoop(
                 tryFunc,
-                new Dictionary<Type, CatchFunc>(){ { typeof(TException), catchFunc } },
+                new Dictionary<Type, CatchFunc>() { { typeof(TException), catchFunc } },
                 maxTries,
                 millisecondsDelay);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -117,9 +182,16 @@ namespace TryRetry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
         public static TResult Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
-            int maxTries = 1, int millisecondsDelay = 0)
+            int maxTries = 1, int millisecondsDelay = 0, string id = null)
         {
-            return RetryLoop(tryFunc, exCatch, maxTries, millisecondsDelay);
+            TResult result = default(TResult);
+
+            if (CanRun(id))
+            {
+                result = RetryLoop(tryFunc, exCatch, maxTries, millisecondsDelay);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -132,13 +204,20 @@ namespace TryRetry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>Task</returns>
         public static async Task<TResult> RetryAsync<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
-            int maxTries = 1, int millisecondsDelay = 0) where TException : Exception
+            int maxTries = 1, int millisecondsDelay = 0, string id = null) where TException : Exception
         {
-            return await Task.Run(() => RetryLoop(
+            TResult result = default(TResult);
+
+            if (CanRun(id))
+            {
+                result = await Task.Run(() => RetryLoop(
                 tryFunc,
                 new Dictionary<Type, CatchFunc>() { { typeof(TException), catchFunc } },
                 maxTries,
                 millisecondsDelay));
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -152,9 +231,16 @@ namespace TryRetry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>Task</returns>
         public static async Task<TResult> RetryAsync(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
-            int maxTries = 1, int millisecondsDelay = 0)
+            int maxTries = 1, int millisecondsDelay = 0, string id = null)
         {
-            return await Task.Run(() => RetryLoop(tryFunc, exCatch, maxTries, millisecondsDelay));
+            TResult result = default(TResult);
+
+            if (CanRun(id))
+            {
+                result = await Task.Run(() => RetryLoop(tryFunc, exCatch, maxTries, millisecondsDelay));
+            }
+
+            return result;
         }
     }
 }
