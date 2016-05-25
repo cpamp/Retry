@@ -23,9 +23,14 @@ namespace Retry
         private static readonly Object thisLock = new Object();
         
         /// <summary>
-        /// Collection of Id's that can only be ran once
+        /// Collection of Id's that can only be ran once.
         /// </summary>
-        private static HashSet<String> runOnceIds = new HashSet<string>();
+        private static HashSet<string> runOnceIds = new HashSet<string>();
+
+        /// <summary>
+        /// Collection of results from run once runs.
+        /// </summary>
+        private static Dictionary<string, TResult> runResults = new Dictionary<string, TResult>();
 
         /// <summary>
         /// Check if retry can only be ran once and add to runOnceIds collection.
@@ -52,6 +57,43 @@ namespace Retry
         }
 
         /// <summary>
+        /// Add result to stored results
+        /// </summary>
+        /// <param name="id">Unique id.</param>
+        /// <param name="value">Value to add.</param>
+        public static void AddResult(string id, TResult value)
+        {
+            lock (thisLock)
+            {
+                if (id != null && !runResults.ContainsKey(id))
+                    runResults.Add(id, value);
+            }
+        }
+
+        /// <summary>
+        /// Remove result from stored results.
+        /// </summary>
+        /// <param name="id">Unique id.</param>
+        public static void RemoveResult(string id)
+        {
+            lock (thisLock)
+            {
+                runResults.Remove(id);
+            }
+        }
+
+        /// <summary>
+        /// Remove all results from stored results.
+        /// </summary>
+        public static void ClearResults()
+        {
+            lock (thisLock)
+            {
+                runResults.Clear();
+            }
+        }
+
+        /// <summary>
         /// Removes an id from the RunOnce collection, allowing it to run again.
         /// </summary>
         /// <param name="id">Id to remove</param>
@@ -60,6 +102,7 @@ namespace Retry
             lock (thisLock)
             {
                 runOnceIds.Remove(id);
+                runResults.Remove(id);
             }
         }
 
@@ -83,6 +126,7 @@ namespace Retry
             lock (thisLock)
             {
                 runOnceIds.Clear();
+                runResults.Clear();
             }
         }
 
@@ -178,6 +222,11 @@ namespace Retry
                 new Dictionary<Type, CatchFunc>() { { typeof(TException), catchFunc } },
                 maxTries,
                 millisecondsDelay);
+                AddResult(id, result);
+            }
+            else
+            {
+                runResults.TryGetValue(id,out result);
             }
 
             return result;
@@ -202,6 +251,10 @@ namespace Retry
             if (CanRun(id))
             {
                 result = RunRetry(tryFunc, exCatch, maxTries, millisecondsDelay);
+            }
+            else
+            {
+                runResults.TryGetValue(id, out result);
             }
 
             return result;
@@ -230,6 +283,10 @@ namespace Retry
                 maxTries,
                 millisecondsDelay));
             }
+            else
+            {
+                runResults.TryGetValue(id, out result);
+            }
 
             return result;
         }
@@ -253,6 +310,10 @@ namespace Retry
             if (CanRun(id))
             {
                 result = await Task.Run(() => RunRetry(tryFunc, exCatch, maxTries, millisecondsDelay));
+            }
+            else
+            {
+                runResults.TryGetValue(id, out result);
             }
 
             return result;
