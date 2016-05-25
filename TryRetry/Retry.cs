@@ -76,6 +76,17 @@ namespace Retry
         }
 
         /// <summary>
+        /// Removes all ids from the RunOnce collection.
+        /// </summary>
+        public static void ClearIds()
+        {
+            lock (thisLock)
+            {
+                runOnceIds.Clear();
+            }
+        }
+
+        /// <summary>
         /// Handles exceptions thrown
         /// </summary>
         /// <param name="e">The <see cref="Exception"/> thrown.</param>
