@@ -98,16 +98,16 @@ namespace TryRetryTest
         {
             Retry<int>.Run<SqlException>(
                 () => Thrower(false),
-                Catcher, 1, 0, "Test");
+                Catcher, 1, 0, "Test3");
             int result = Retry<int>.Run<SqlException>(
                 () => Thrower(false),
-                Catcher, 1, 0, "Test");
+                Catcher, 1, 0, "Test3");
             Retry<int>.Run<SqlException>(
                 () => Thrower(false),
-                Catcher, 1, 0, "Test1");
+                Catcher, 1, 0, "Test4");
             int result2 = Retry<int>.Run<SqlException>(
                 () => Thrower(false),
-                Catcher, 1, 0, "Test1");
+                Catcher, 1, 0, "Test4");
             Assert.AreEqual<int>(result + result2, 2);
         }
     }
