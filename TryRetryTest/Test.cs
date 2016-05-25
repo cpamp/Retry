@@ -32,8 +32,7 @@ namespace TryRetryTest
         private int Catcher(Exception e)
         {
             TestContext.WriteLine("Catcher");
-            SqlException sEx = (SqlException)e;
-            TestContext.WriteLine(sEx.Number.ToString());
+            SqlException sEx = e as SqlException;
             return -1;
         }
 
@@ -79,13 +78,37 @@ namespace TryRetryTest
         [TestMethod]
         public void RunOnce()
         {
+            int result = Retry<int>.Run<IndexOutOfRangeException>(
+                () => {
+                    TestContext.WriteLine("Outer Thrower");
+                    Retry<int>.Run<SqlException>(
+                        () => Thrower(),
+                        Catcher, 1, 0, "Test2");
+                    throw new IndexOutOfRangeException();
+                },
+                Catcher, 5, 0, "Test");
+            Assert.AreEqual<int>(-1, result);
+        }
+
+        /// <summary>
+        /// Test stored results.
+        /// </summary>
+        [TestMethod]
+        public void RunOnceStoreResults()
+        {
             Retry<int>.Run<SqlException>(
-                () => Thrower(),
+                () => Thrower(false),
                 Catcher, 1, 0, "Test");
             int result = Retry<int>.Run<SqlException>(
-                () => Thrower(),
+                () => Thrower(false),
                 Catcher, 1, 0, "Test");
-            Assert.AreEqual<int>(0, result);
+            Retry<int>.Run<SqlException>(
+                () => Thrower(false),
+                Catcher, 1, 0, "Test1");
+            int result2 = Retry<int>.Run<SqlException>(
+                () => Thrower(false),
+                Catcher, 1, 0, "Test1");
+            Assert.AreEqual<int>(result + result2, 2);
         }
     }
 }
