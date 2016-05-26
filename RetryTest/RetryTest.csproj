@@ -55,7 +55,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TryRetry\Retry.csproj">
+    <ProjectReference Include="..\Retry\Retry.csproj">
       <Project>{903248e3-3bae-4667-bb8f-d05e799aef2f}</Project>
       <Name>Retry</Name>
     </ProjectReference>
