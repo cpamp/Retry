@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Retry", "TryRetry\Retry.csproj", "{903248E3-3BAE-4667-BB8F-D05E799AEF2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryRetryTest", "TryRetryTest\TryRetryTest.csproj", "{51473AE3-7DE8-45C6-BBF6-B7F6474197AF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RetryTest", "TryRetryTest\RetryTest.csproj", "{51473AE3-7DE8-45C6-BBF6-B7F6474197AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
