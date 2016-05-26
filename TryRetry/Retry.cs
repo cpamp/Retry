@@ -22,10 +22,10 @@ namespace Retry
         /// </summary>
         private static readonly Object thisLock = new Object();
         
-        /// <summary>
-        /// Collection of Id's that can only be ran once.
-        /// </summary>
-        private static HashSet<string> runOnceIds = new HashSet<string>();
+        ///// <summary>
+        ///// Collection of Id's that can only be ran once.
+        ///// </summary>
+        //private static HashSet<string> runOnceIds = new HashSet<string>();
 
         /// <summary>
         /// Collection of results from run once runs.
@@ -43,13 +43,9 @@ namespace Retry
 
             lock (thisLock)
             {
-                if (id != null && runOnceIds.Contains(id))
+                if (id != null && runResults.ContainsKey(id))
                 {
                     result = false;
-                }
-                else if (id != null)
-                {
-                    runOnceIds.Add(id);
                 }
             }
 
@@ -65,7 +61,7 @@ namespace Retry
         {
             lock (thisLock)
             {
-                if (id != null && !runResults.ContainsKey(id))
+                if (id != null)
                     runResults.Add(id, value);
             }
         }
@@ -83,49 +79,12 @@ namespace Retry
         }
 
         /// <summary>
-        /// Remove all results from stored results.
+        /// Removes all ids from the RunOnce collection.
         /// </summary>
         public static void ClearResults()
         {
             lock (thisLock)
             {
-                runResults.Clear();
-            }
-        }
-
-        /// <summary>
-        /// Removes an id from the RunOnce collection, allowing it to run again.
-        /// </summary>
-        /// <param name="id">Id to remove</param>
-        public static void RemoveId(string id)
-        {
-            lock (thisLock)
-            {
-                runOnceIds.Remove(id);
-                runResults.Remove(id);
-            }
-        }
-
-        /// <summary>
-        /// Adds an id to the RunOnce collection, preventing it from being ran again.
-        /// </summary>
-        /// <param name="id">Id to add.</param>
-        public static void AddId(string id)
-        {
-            lock (thisLock)
-            {
-                runOnceIds.Add(id);
-            }
-        }
-
-        /// <summary>
-        /// Removes all ids from the RunOnce collection.
-        /// </summary>
-        public static void ClearIds()
-        {
-            lock (thisLock)
-            {
-                runOnceIds.Clear();
                 runResults.Clear();
             }
         }
@@ -226,7 +185,7 @@ namespace Retry
             }
             else
             {
-                runResults.TryGetValue(id,out result);
+                runResults.TryGetValue(id, out result);
             }
 
             return result;
