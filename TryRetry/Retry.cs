@@ -79,7 +79,7 @@ namespace Retry
         }
 
         /// <summary>
-        /// Removes all ids from the RunOnce collection.
+        /// Removes all results from the runResults collection.
         /// </summary>
         public static void ClearResults()
         {
