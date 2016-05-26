@@ -16,78 +16,11 @@ namespace Retry
         /// <param name="e">Exception that is being handled.</param>
         /// <returns>TResult</returns>
         public delegate TResult CatchFunc(Exception e);
-
-        /// <summary>
-        /// Lock
-        /// </summary>
-        private static readonly Object thisLock = new Object();
         
-        ///// <summary>
-        ///// Collection of Id's that can only be ran once.
-        ///// </summary>
-        //private static HashSet<string> runOnceIds = new HashSet<string>();
-
         /// <summary>
         /// Collection of results from run once runs.
         /// </summary>
-        private static Dictionary<string, TResult> runResults = new Dictionary<string, TResult>();
-
-        /// <summary>
-        /// Check if retry can only be ran once and add to runOnceIds collection.
-        /// </summary>
-        /// <param name="id">Id of Retry</param>
-        /// <returns>True if can run, false if cannot run.</returns>
-        private static bool CanRun(string id)
-        {
-            bool result = true;
-
-            lock (thisLock)
-            {
-                if (id != null && runResults.ContainsKey(id))
-                {
-                    result = false;
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Add result to stored results
-        /// </summary>
-        /// <param name="id">Unique id.</param>
-        /// <param name="value">Value to add.</param>
-        public static void AddResult(string id, TResult value)
-        {
-            lock (thisLock)
-            {
-                if (id != null)
-                    runResults.Add(id, value);
-            }
-        }
-
-        /// <summary>
-        /// Remove result from stored results.
-        /// </summary>
-        /// <param name="id">Unique id.</param>
-        public static void RemoveResult(string id)
-        {
-            lock (thisLock)
-            {
-                runResults.Remove(id);
-            }
-        }
-
-        /// <summary>
-        /// Removes all results from the runResults collection.
-        /// </summary>
-        public static void ClearResults()
-        {
-            lock (thisLock)
-            {
-                runResults.Clear();
-            }
-        }
+        public static RunResults<TResult> Results = new RunResults<TResult>();
 
         /// <summary>
         /// Handles exceptions thrown
@@ -174,18 +107,18 @@ namespace Retry
         {
             TResult result = default(TResult);
 
-            if (CanRun(id))
+            if (Results.CanRun(id))
             {
                 result = RunRetry(
                 tryFunc,
                 new Dictionary<Type, CatchFunc>() { { typeof(TException), catchFunc } },
                 maxTries,
                 millisecondsDelay);
-                AddResult(id, result);
+                Results.AddResult(id, result);
             }
             else
             {
-                runResults.TryGetValue(id, out result);
+                result = Results.GetResult(id);
             }
 
             return result;
@@ -207,13 +140,13 @@ namespace Retry
         {
             TResult result = default(TResult);
 
-            if (CanRun(id))
+            if (Results.CanRun(id))
             {
                 result = RunRetry(tryFunc, exCatch, maxTries, millisecondsDelay);
             }
             else
             {
-                runResults.TryGetValue(id, out result);
+                result = Results.GetResult(id);
             }
 
             return result;
@@ -234,7 +167,7 @@ namespace Retry
         {
             TResult result = default(TResult);
 
-            if (CanRun(id))
+            if (Results.CanRun(id))
             {
                 result = await Task.Run(() => RunRetry(
                 tryFunc,
@@ -244,7 +177,7 @@ namespace Retry
             }
             else
             {
-                runResults.TryGetValue(id, out result);
+                result = Results.GetResult(id);
             }
 
             return result;
@@ -266,13 +199,13 @@ namespace Retry
         {
             TResult result = default(TResult);
 
-            if (CanRun(id))
+            if (Results.CanRun(id))
             {
                 result = await Task.Run(() => RunRetry(tryFunc, exCatch, maxTries, millisecondsDelay));
             }
             else
             {
-                runResults.TryGetValue(id, out result);
+                result = Results.GetResult(id);
             }
 
             return result;
