@@ -98,7 +98,7 @@ namespace Retry.CircuitBreaker
             {
                 try
                 {
-                    execFunc();
+                    result = execFunc();
                 }
                 catch (Exception e)
                 {
