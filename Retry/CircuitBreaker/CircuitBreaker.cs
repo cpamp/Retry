@@ -65,9 +65,9 @@ namespace Retry.CircuitBreaker
         public int Timeout { get; }
 
         /// <summary>
-        /// Whether the circuit is going to continue or not.
+        /// Whether the circuit is running or not.
         /// </summary>
-        public bool Continue { get; set; }
+        public bool Running { get; set; }
 
         #region Constructors
         /// <summary>
@@ -95,7 +95,7 @@ namespace Retry.CircuitBreaker
             Threshold = threshold;
             Timeout = timeout;
             HalfOpenThreshold = halfOpenThreshold;
-            Continue = true;
+            Running = true;
         }
         #endregion
 
@@ -124,7 +124,7 @@ namespace Retry.CircuitBreaker
                 throw new OpenCircuitException();
             }
 
-            Continue = false;
+            Running = false;
             return result;
         }
 
@@ -185,7 +185,7 @@ namespace Retry.CircuitBreaker
             else if (State == CircuitBreakerState.Open && HalfOpenThreshold < 0 ||
                 HalfOpenThreshold <= FailedHalfOpenCount)
             {
-                Continue = false;
+                Running = false;
             }
             else if (State == CircuitBreakerState.Closed)
             {

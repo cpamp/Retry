@@ -76,7 +76,7 @@ namespace Retry
 
             cb = new CircuitBreaker<TResult>(maxTries, millisecondsDelay, halfOpenThreshold);
 
-            while (cb.Continue)
+            while (cb.Running)
             {
                 try
                 {
