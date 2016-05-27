@@ -82,10 +82,11 @@ namespace TryRetryTest
         public void RunOnce()
         {
             Retry<int> retry = new Retry<int>();
+            Retry<int> retry2 = new Retry<int>();
             int result = retry.Run<IndexOutOfRangeException>(
                 () => {
                     TestContext.WriteLine("Outer Thrower");
-                    retry.Run<SqlException>(
+                    retry2.Run<SqlException>(
                         () => Thrower(),
                         Catcher, 1, 0, "Test2");
                     throw new IndexOutOfRangeException();
