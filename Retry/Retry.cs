@@ -84,7 +84,7 @@ namespace Retry
                 }
                 catch (OpenCircuitException)
                 {
-                    System.Console.WriteLine("Open Circuit");
+                    System.Diagnostics.Debug.WriteLine("Open Circuit.");
                 }
                 catch (Exception e)
                 {
