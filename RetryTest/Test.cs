@@ -43,7 +43,8 @@ namespace TryRetryTest
         [ExpectedException(typeof(SqlException))]
         public void WrongException()
         {
-            Retry<int>.Run<NullReferenceException>(
+            Retry<int> retry = new Retry<int>();
+            retry.Run<NullReferenceException>(
                 () => Thrower(),
                 Catcher);
         }
@@ -54,7 +55,8 @@ namespace TryRetryTest
         [TestMethod]
         public void Failed()
         {
-            int result = Retry<int>.Run<SqlException>(
+            Retry<int> retry = new Retry<int>();
+            int result = retry.Run<SqlException>(
                 () => Thrower(),
                 Catcher);
             Assert.AreEqual<int>(-1, result);
@@ -66,7 +68,8 @@ namespace TryRetryTest
         [TestMethod]
         public void Passed()
         {
-            int result = Retry<int>.Run<SqlException>(
+            Retry<int> retry = new Retry<int>();
+            int result = retry.Run<SqlException>(
                 () => Thrower(false),
                 Catcher);
             Assert.AreEqual<int>(1, result);
@@ -78,7 +81,8 @@ namespace TryRetryTest
         [TestMethod]
         public void RunOnce()
         {
-            int result = Retry<int>.Run<IndexOutOfRangeException>(
+            Retry<int> retry = new Retry<int>();
+            int result = retry.Run<IndexOutOfRangeException>(
                 () => {
                     TestContext.WriteLine("Outer Thrower");
                     Retry<int>.Run<SqlException>(
@@ -96,16 +100,17 @@ namespace TryRetryTest
         [TestMethod]
         public void RunOnceStoreResults()
         {
-            Retry<int>.Run<SqlException>(
+            Retry<int> retry = new Retry<int>();
+            retry.Run<SqlException>(
                 () => Thrower(false),
                 Catcher, 1, 0, "Test3");
-            int result = Retry<int>.Run<SqlException>(
+            int result = retry.Run<SqlException>(
                 () => Thrower(false),
                 Catcher, 1, 0, "Test3");
-            Retry<int>.Run<SqlException>(
+            retry.Run<SqlException>(
                 () => Thrower(false),
                 Catcher, 1, 0, "Test4");
-            int result2 = Retry<int>.Run<SqlException>(
+            int result2 = retry.Run<SqlException>(
                 () => Thrower(false),
                 Catcher, 1, 0, "Test4");
             Assert.AreEqual<int>(result + result2, 2);
