@@ -8,6 +8,9 @@ namespace Retry.CircuitBreaker
 {
     public class CircuitBreaker<TResult>
     {
+        /// <summary>
+        /// The state of the circuit breaker.
+        /// </summary>
         private CircuitBreakerState _state;
 
         private readonly object thisLock = new object();
@@ -90,11 +93,7 @@ namespace Retry.CircuitBreaker
         {
             TResult result = default(TResult);
 
-            if (State == CircuitBreakerState.Open)
-            {
-                throw new OpenCircuitException();
-            }
-            else if (State != CircuitBreakerState.Open)
+            if (State != CircuitBreakerState.Open)
             {
                 try
                 {
@@ -105,6 +104,10 @@ namespace Retry.CircuitBreaker
                     CaughtException();
                     throw e;
                 }
+            }
+            else if (State == CircuitBreakerState.Open)
+            {
+                throw new OpenCircuitException();
             }
 
             Continue = false;
