@@ -19,7 +19,7 @@ namespace Retry.CircuitBreaker
         private readonly object thisLock = new object();
 
         /// <summary>
-        /// Last exception which occured.
+        /// Last exception which occurred.
         /// </summary>
         public Exception LastException { get; set; }
 
@@ -106,7 +106,8 @@ namespace Retry.CircuitBreaker
         {
             TResult result = default(TResult);
 
-            if (State != CircuitBreakerState.Open)
+            if (State == CircuitBreakerState.Closed ||
+                State == CircuitBreakerState.HalfOpen)
             {
                 try
                 {
@@ -164,9 +165,9 @@ namespace Retry.CircuitBreaker
         /// <summary>
         /// Wait for timeout to continue
         /// </summary>
-        public async void Wait()
+        public void Wait()
         {
-            await Task.Run(() => { System.Threading.Thread.Sleep(Timeout); });
+            System.Threading.Thread.Sleep(Timeout);
             State = CircuitBreakerState.HalfOpen;
         }
 
@@ -181,7 +182,8 @@ namespace Retry.CircuitBreaker
             {
                 Wait();
             }
-            else if (State == CircuitBreakerState.Open && HalfOpenThreshold < 0)
+            else if (State == CircuitBreakerState.Open && HalfOpenThreshold < 0 ||
+                HalfOpenThreshold <= FailedHalfOpenCount)
             {
                 Continue = false;
             }
