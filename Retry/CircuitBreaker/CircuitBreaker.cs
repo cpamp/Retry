@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Retry.CircuitBreaker
 {
+    /// <summary>
+    /// Circuit breaker class for managing retry attempts
+    /// </summary>
+    /// <typeparam name="TResult">Type expected to be returned from Execute</typeparam>
     public class CircuitBreaker<TResult>
     {
         /// <summary>

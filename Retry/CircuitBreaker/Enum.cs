@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Retry.CircuitBreaker
+﻿namespace Retry.CircuitBreaker
 {
+    /// <summary>
+    /// State of the a circuit breaker.
+    /// </summary>
     public enum CircuitBreakerState
     {
         Closed,
