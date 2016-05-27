@@ -2,6 +2,7 @@
 using Retry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 
 namespace TryRetryTest
 {
@@ -115,6 +116,19 @@ namespace TryRetryTest
                 () => Thrower(false),
                 Catcher, 1, 0, "Test4");
             Assert.AreEqual<int>(result + result2, 2);
+        }
+
+        /// <summary>
+        /// Test for an async failed attempt despite retrying.
+        /// </summary>
+        [TestMethod]
+        public async Task FailedAsync()
+        {
+            Retry<int> retry = new Retry<int>();
+            int result = await retry.RunAsync<SqlException>(
+                () => Thrower(),
+                Catcher, 5, 100, "test", 5);
+            Assert.AreEqual<int>(-1, result);
         }
     }
 }
