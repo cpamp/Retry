@@ -105,7 +105,7 @@ namespace Retry.CircuitBreaker
                     throw e;
                 }
             }
-            else if (State == CircuitBreakerState.Open)
+            else
             {
                 throw new OpenCircuitException();
             }
