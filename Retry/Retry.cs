@@ -18,6 +18,9 @@ namespace Retry
         /// <returns>TResult</returns>
         public delegate TResult CatchFunc(Exception e);
 
+        /// <summary>
+        /// The circuit breaker
+        /// </summary>
         private CircuitBreaker<TResult> cb;
         
         /// <summary>
@@ -86,7 +89,6 @@ namespace Retry
                 catch (Exception e)
                 {
                     result = HandleException(e, exCatch);
-                    
                 }
             }
 
