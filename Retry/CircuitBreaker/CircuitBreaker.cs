@@ -29,6 +29,21 @@ namespace Retry.CircuitBreaker
         public int FailCount { get; set; }
 
         /// <summary>
+        /// Failed half open tries.
+        /// </summary>
+        public int FailedHalfOpenCount { get; set; }
+
+        /// <summary>
+        /// Number of times the circuit breaker is allowed to fail.
+        /// </summary>
+        public int Threshold { get; }
+
+        /// <summary>
+        /// Number of times the circuit break is allowed to fail when half open.
+        /// </summary>
+        public int HalfOpenThreshold { get; }
+
+        /// <summary>
         /// The state of the circuit breaker.
         /// </summary>
         public CircuitBreakerState State
@@ -45,19 +60,9 @@ namespace Retry.CircuitBreaker
         }
 
         /// <summary>
-        /// Number of times the circuit breaker is allowed to fail.
-        /// </summary>
-        public int Threshold { get; }
-
-        /// <summary>
         /// Time in milliseconds to wait before trying an open circuit.
         /// </summary>
         public int Timeout { get; }
-
-        /// <summary>
-        /// Whether the caller is async or not.
-        /// </summary>
-        public bool TryForever { get; }
 
         /// <summary>
         /// Whether the circuit is going to continue or not.
@@ -68,13 +73,13 @@ namespace Retry.CircuitBreaker
         /// <summary>
         /// Default constructor
         /// </summary>
-        public CircuitBreaker() : this(1, 0, false) { }
+        public CircuitBreaker() : this(1, 0) { }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="threshold">Circuit threshold.</param>
-        public CircuitBreaker(int threshold) : this(threshold, 0, false) { }
+        public CircuitBreaker(int threshold) : this(threshold, 0) { }
 
         /// <summary>
         /// Constructor
@@ -83,13 +88,13 @@ namespace Retry.CircuitBreaker
         /// <param name="timeout">Time in milliseconds to wait before trying an open circuit.</param>
         /// <param name="async">Whether the caller is async. If not, circuit stays open permanently 
         /// and is not tried again. Defaults true.</param>
-        public CircuitBreaker(int threshold, int timeout, bool async = true)
+        public CircuitBreaker(int threshold, int timeout, int halfOpenThreshold = -1)
         {
             FailCount = 0;
             State = CircuitBreakerState.Closed;
             Threshold = threshold;
             Timeout = timeout;
-            TryForever = async;
+            HalfOpenThreshold = halfOpenThreshold;
             Continue = true;
         }
         #endregion
@@ -129,7 +134,11 @@ namespace Retry.CircuitBreaker
         {
             LastException = e;
             FailCount++;
-            if (FailCount > Threshold)
+            if (State == CircuitBreakerState.HalfOpen)
+            {
+                FailedHalfOpenCount++;
+            }
+            else if (FailCount > Threshold)
             {
                 Trip();
             }
@@ -165,11 +174,13 @@ namespace Retry.CircuitBreaker
         /// </summary>
         public void OnStateChanged()
         {
-            if (State == CircuitBreakerState.Open && TryForever)
+            if (State == CircuitBreakerState.Open && 
+                HalfOpenThreshold > 0 && 
+                HalfOpenThreshold > FailedHalfOpenCount)
             {
                 Wait();
             }
-            else if (State == CircuitBreakerState.Open && !TryForever)
+            else if (State == CircuitBreakerState.Open && HalfOpenThreshold < 0)
             {
                 Continue = false;
             }
