@@ -13,7 +13,15 @@ namespace Retry.CircuitBreaker
         /// </summary>
         private CircuitBreakerState _state;
 
+        /// <summary>
+        /// Lock
+        /// </summary>
         private readonly object thisLock = new object();
+
+        /// <summary>
+        /// Last exception which occured.
+        /// </summary>
+        public Exception LastException { get; set; }
 
         /// <summary>
         /// Number of times the circuit breaker has failed.
@@ -101,7 +109,7 @@ namespace Retry.CircuitBreaker
                 }
                 catch (Exception e)
                 {
-                    CaughtException();
+                    CaughtException(e);
                     throw e;
                 }
             }
@@ -117,8 +125,9 @@ namespace Retry.CircuitBreaker
         /// <summary>
         /// Increment fail counter and trip if exceeds threshold.
         /// </summary>
-        public void CaughtException()
+        public void CaughtException(Exception e)
         {
+            LastException = e;
             FailCount++;
             if (FailCount > Threshold)
             {
