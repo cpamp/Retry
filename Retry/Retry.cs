@@ -8,7 +8,7 @@ namespace Retry
     /// Class for simulating Try, Catch, Retry (n) times.
     /// </summary>
     /// <typeparam name="TResult">Type to be returned.</typeparam>
-    public static class Retry<TResult>
+    public class Retry<TResult>
     {
         /// <summary>
         /// Delegate for catch block function.
@@ -29,7 +29,7 @@ namespace Retry
         /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
         /// as key and <see cref="CatchFunc"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <returns>Result of catch function.</returns>
-        private static TResult HandleException(Exception e, IDictionary<Type, CatchFunc> exCatch)
+        private TResult HandleException(Exception e, IDictionary<Type, CatchFunc> exCatch)
         {
             TResult result = default(TResult);
             bool handled = false;
@@ -62,7 +62,7 @@ namespace Retry
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
-        private static TResult RunRetry(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
+        private TResult RunRetry(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
             int maxTries = 1, int millisecondsDelay = 0)
         {
             TResult result = default(TResult);
@@ -102,7 +102,7 @@ namespace Retry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
-        public static TResult Run<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
+        public TResult Run<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
             int maxTries = 1, int millisecondsDelay = 0, string id = null) where TException : Exception
         {
             TResult result = default(TResult);
@@ -135,7 +135,7 @@ namespace Retry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
-        public static TResult Run(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
+        public TResult Run(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
             int maxTries = 1, int millisecondsDelay = 0, string id = null)
         {
             TResult result = default(TResult);
@@ -162,7 +162,7 @@ namespace Retry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>Task</returns>
-        public static async Task<TResult> RunAsync<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
+        public async Task<TResult> RunAsync<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
             int maxTries = 1, int millisecondsDelay = 0, string id = null) where TException : Exception
         {
             TResult result = default(TResult);
@@ -194,7 +194,7 @@ namespace Retry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>Task</returns>
-        public static async Task<TResult> RunAsync(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
+        public async Task<TResult> RunAsync(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
             int maxTries = 1, int millisecondsDelay = 0, string id = null)
         {
             TResult result = default(TResult);
