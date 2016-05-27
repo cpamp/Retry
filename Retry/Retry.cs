@@ -69,12 +69,12 @@ namespace Retry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
         private TResult RunRetry(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
-            int maxTries = 1, int millisecondsDelay = 0, bool tryForever = false)
+            int maxTries = 1, int millisecondsDelay = 0, int halfOpenThreshold = -1)
         {
             TResult result = default(TResult);
             maxTries = Math.Max(maxTries, 1);
 
-            cb = new CircuitBreaker<TResult>(maxTries, millisecondsDelay, tryForever);
+            cb = new CircuitBreaker<TResult>(maxTries, millisecondsDelay, halfOpenThreshold);
 
             while (cb.Continue)
             {
@@ -167,7 +167,7 @@ namespace Retry
         /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>Task</returns>
         public async Task<TResult> RunAsync<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
-            int maxTries = 1, int millisecondsDelay = 0, string id = null, bool tryForever = false) where TException : Exception
+            int maxTries = 1, int millisecondsDelay = 0, string id = null, int halfOpenThreshold = -1) where TException : Exception
         {
             TResult result = default(TResult);
 
@@ -178,7 +178,7 @@ namespace Retry
                 new Dictionary<Type, CatchFunc>() { { typeof(TException), catchFunc } },
                 maxTries,
                 millisecondsDelay,
-                tryForever));
+                halfOpenThreshold));
             }
             else
             {
@@ -200,7 +200,7 @@ namespace Retry
         /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>Task</returns>
         public async Task<TResult> RunAsync(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
-            int maxTries = 1, int millisecondsDelay = 0, string id = null, bool tryForever = false)
+            int maxTries = 1, int millisecondsDelay = 0, string id = null, int halfOpenThreshold = -1)
         {
             TResult result = default(TResult);
 
@@ -211,7 +211,7 @@ namespace Retry
                     exCatch, 
                     maxTries,
                     millisecondsDelay, 
-                    tryForever));
+                    halfOpenThreshold));
             }
             else
             {
