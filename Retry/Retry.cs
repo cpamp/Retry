@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Retry.CircuitBreaker;
 
 namespace Retry
 {
@@ -16,6 +17,8 @@ namespace Retry
         /// <param name="e">Exception that is being handled.</param>
         /// <returns>TResult</returns>
         public delegate TResult CatchFunc(Exception e);
+
+        private CircuitBreaker<TResult> cb;
         
         /// <summary>
         /// Collection of results from run once runs.
@@ -63,28 +66,27 @@ namespace Retry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
         private TResult RunRetry(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
-            int maxTries = 1, int millisecondsDelay = 0)
+            int maxTries = 1, int millisecondsDelay = 0, bool async = false)
         {
             TResult result = default(TResult);
-            int numTries = 0;
             maxTries = Math.Max(maxTries, 1);
 
-            while (numTries <= maxTries)
+            cb = new CircuitBreaker<TResult>(maxTries, millisecondsDelay, async);
+
+            while (cb.Continue)
             {
                 try
                 {
-                    result = tryFunc();
-                    break;
+                    result = cb.Execute(tryFunc);
+                }
+                catch (OpenCircuitException)
+                {
+                    System.Console.WriteLine("Open Circuit");
                 }
                 catch (Exception e)
                 {
                     result = HandleException(e, exCatch);
-                }
-
-                numTries++;
-                if (millisecondsDelay > 0 && numTries <= maxTries)
-                {
-                    System.Threading.Thread.Sleep(millisecondsDelay);
+                    
                 }
             }
 
@@ -173,7 +175,8 @@ namespace Retry
                 tryFunc,
                 new Dictionary<Type, CatchFunc>() { { typeof(TException), catchFunc } },
                 maxTries,
-                millisecondsDelay));
+                millisecondsDelay,
+                true));
             }
             else
             {
@@ -201,7 +204,7 @@ namespace Retry
 
             if (Results.CanRun(id))
             {
-                result = await Task.Run(() => RunRetry(tryFunc, exCatch, maxTries, millisecondsDelay));
+                result = await Task.Run(() => RunRetry(tryFunc, exCatch, maxTries, millisecondsDelay, true));
             }
             else
             {
