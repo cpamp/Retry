@@ -165,6 +165,7 @@ namespace Retry
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <param name="id">Unique id of to associate with this call.</param>
+        /// <param name="halfOpenThreshold">Number of times HalfOpen attempts are allowed to fail.</param>
         /// <returns>Task</returns>
         public async Task<TResult> RunAsync<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
             int maxTries = 1, int millisecondsDelay = 0, string id = null, int halfOpenThreshold = -1) where TException : Exception
@@ -198,6 +199,7 @@ namespace Retry
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <param name="id">Unique id of to associate with this call.</param>
+        /// <param name="halfOpenThreshold">Number of times HalfOpen attempts are allowed to fail.</param>
         /// <returns>Task</returns>
         public async Task<TResult> RunAsync(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
             int maxTries = 1, int millisecondsDelay = 0, string id = null, int halfOpenThreshold = -1)

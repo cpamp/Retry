@@ -86,8 +86,7 @@ namespace Retry.CircuitBreaker
         /// </summary>
         /// <param name="threshold">Circuit threshold.</param>
         /// <param name="timeout">Time in milliseconds to wait before trying an open circuit.</param>
-        /// <param name="async">Whether the caller is async. If not, circuit stays open permanently 
-        /// and is not tried again. Defaults true.</param>
+        /// <param name="halfOpenThreshold">Number of half open attempts are allowed to fail.</param>
         public CircuitBreaker(int threshold, int timeout, int halfOpenThreshold = -1)
         {
             FailCount = 0;
