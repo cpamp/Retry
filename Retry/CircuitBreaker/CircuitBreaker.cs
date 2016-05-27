@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Retry.CircuitBreaker
 {
@@ -164,9 +165,9 @@ namespace Retry.CircuitBreaker
         /// <summary>
         /// Wait for timeout to continue
         /// </summary>
-        public void Wait()
+        public async Task Wait()
         {
-            System.Threading.Thread.Sleep(Timeout);
+            await Task.Run(() => { System.Threading.Thread.Sleep(Timeout); });
             State = CircuitBreakerState.HalfOpen;
         }
 
