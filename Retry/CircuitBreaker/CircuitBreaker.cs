@@ -57,7 +57,7 @@ namespace Retry.CircuitBreaker
         /// <summary>
         /// Whether the caller is async or not.
         /// </summary>
-        public bool Async { get; }
+        public bool TryForever { get; }
 
         /// <summary>
         /// Whether the circuit is going to continue or not.
@@ -89,7 +89,7 @@ namespace Retry.CircuitBreaker
             State = CircuitBreakerState.Closed;
             Threshold = threshold;
             Timeout = timeout;
-            Async = async;
+            TryForever = async;
             Continue = true;
         }
         #endregion
@@ -165,11 +165,11 @@ namespace Retry.CircuitBreaker
         /// </summary>
         public void OnStateChanged()
         {
-            if (State == CircuitBreakerState.Open && Async)
+            if (State == CircuitBreakerState.Open && TryForever)
             {
                 Wait();
             }
-            else if (State == CircuitBreakerState.Open && !Async)
+            else if (State == CircuitBreakerState.Open && !TryForever)
             {
                 Continue = false;
             }

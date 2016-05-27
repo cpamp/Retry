@@ -69,12 +69,12 @@ namespace Retry
         /// <param name="millisecondsDelay">Milliseconds to delay next try.</param>
         /// <returns>tryFunc return value or catchFunc return value.</returns>
         private TResult RunRetry(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
-            int maxTries = 1, int millisecondsDelay = 0, bool async = false)
+            int maxTries = 1, int millisecondsDelay = 0, bool tryForever = false)
         {
             TResult result = default(TResult);
             maxTries = Math.Max(maxTries, 1);
 
-            cb = new CircuitBreaker<TResult>(maxTries, millisecondsDelay, async);
+            cb = new CircuitBreaker<TResult>(maxTries, millisecondsDelay, tryForever);
 
             while (cb.Continue)
             {
@@ -167,7 +167,7 @@ namespace Retry
         /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>Task</returns>
         public async Task<TResult> RunAsync<TException>(Func<TResult> tryFunc, CatchFunc catchFunc = null,
-            int maxTries = 1, int millisecondsDelay = 0, string id = null) where TException : Exception
+            int maxTries = 1, int millisecondsDelay = 0, string id = null, bool tryForever = false) where TException : Exception
         {
             TResult result = default(TResult);
 
@@ -178,7 +178,7 @@ namespace Retry
                 new Dictionary<Type, CatchFunc>() { { typeof(TException), catchFunc } },
                 maxTries,
                 millisecondsDelay,
-                true));
+                tryForever));
             }
             else
             {
@@ -200,13 +200,18 @@ namespace Retry
         /// <param name="id">Unique id of to associate with this call.</param>
         /// <returns>Task</returns>
         public async Task<TResult> RunAsync(Func<TResult> tryFunc, IDictionary<Type, CatchFunc> exCatch,
-            int maxTries = 1, int millisecondsDelay = 0, string id = null)
+            int maxTries = 1, int millisecondsDelay = 0, string id = null, bool tryForever = false)
         {
             TResult result = default(TResult);
 
             if (Results.CanRun(id))
             {
-                result = await Task.Run(() => RunRetry(tryFunc, exCatch, maxTries, millisecondsDelay, true));
+                result = await Task.Run(() => RunRetry(
+                    tryFunc, 
+                    exCatch, 
+                    maxTries,
+                    millisecondsDelay, 
+                    tryForever));
             }
             else
             {
