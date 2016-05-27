@@ -137,6 +137,7 @@ namespace Retry.CircuitBreaker
             if (State == CircuitBreakerState.HalfOpen)
             {
                 FailedHalfOpenCount++;
+                Trip();
             }
             else if (FailCount > Threshold)
             {
