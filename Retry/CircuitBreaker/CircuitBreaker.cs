@@ -165,7 +165,7 @@ namespace Retry.CircuitBreaker
         /// <summary>
         /// Wait for timeout to continue
         /// </summary>
-        public async Task Wait()
+        public async void Wait()
         {
             await Task.Run(() => { System.Threading.Thread.Sleep(Timeout); });
             State = CircuitBreakerState.HalfOpen;
