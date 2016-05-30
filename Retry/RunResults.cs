@@ -46,7 +46,10 @@ namespace Retry
         public TResult GetResult(string id)
         {
             TResult result = default(TResult);
-            runResults.TryGetValue(id, out result);
+            lock (thisLock)
+            {
+                runResults.TryGetValue(id, out result);
+            }
             return result;
         }
 
