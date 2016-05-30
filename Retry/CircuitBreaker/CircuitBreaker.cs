@@ -162,6 +162,7 @@ namespace Retry.CircuitBreaker
             State = CircuitBreakerState.Closed;
             FailCount = 0;
             FailedHalfOpenCount = 0;
+            Running = true;
         }
 
         /// <summary>
