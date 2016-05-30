@@ -3,6 +3,7 @@ using Retry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace TryRetryTest
 {
@@ -19,7 +20,8 @@ namespace TryRetryTest
         private int Thrower(bool fail = true)
         {
             TestContext.WriteLine("Thrower");
-            if (fail) {
+            if (fail)
+            {
                 SqlConnection conn = new SqlConnection(@"Connection Timeout=1");
                 conn.Open();
             }
@@ -44,10 +46,14 @@ namespace TryRetryTest
         [ExpectedException(typeof(SqlException))]
         public void WrongException()
         {
-            Retry<int> retry = new Retry<int>();
-            retry.Run<NullReferenceException>(
+            Dictionary<Type, Retry<int>.CatchFunction> exCatch =
+                new Dictionary<Type, Retry<int>.CatchFunction>()
+            { { typeof(NullReferenceException), Catcher } };
+
+            Retry<int> retry = new Retry<int>(
                 () => Thrower(),
-                Catcher);
+                exCatch);
+            retry.Run();
         }
 
         /// <summary>
@@ -56,10 +62,14 @@ namespace TryRetryTest
         [TestMethod]
         public void Failed()
         {
-            Retry<int> retry = new Retry<int>();
-            int result = retry.Run<SqlException>(
+            Dictionary<Type, Retry<int>.CatchFunction> exCatch =
+                new Dictionary<Type, Retry<int>.CatchFunction>()
+            { { typeof(SqlException), Catcher } };
+
+            Retry<int> retry = new Retry<int>(
                 () => Thrower(),
-                Catcher);
+                exCatch);
+            int result = retry.Run();
             Assert.AreEqual<int>(-1, result);
         }
 
@@ -69,10 +79,14 @@ namespace TryRetryTest
         [TestMethod]
         public void Passed()
         {
-            Retry<int> retry = new Retry<int>();
-            int result = retry.Run<SqlException>(
+            Dictionary<Type, Retry<int>.CatchFunction> exCatch =
+                new Dictionary<Type, Retry<int>.CatchFunction>()
+            { { typeof(SqlException), Catcher } };
+
+            Retry<int> retry = new Retry<int>(
                 () => Thrower(false),
-                Catcher);
+                exCatch);
+            int result = retry.Run();
             Assert.AreEqual<int>(1, result);
         }
 
@@ -82,17 +96,28 @@ namespace TryRetryTest
         [TestMethod]
         public void RunOnce()
         {
-            Retry<int> retry = new Retry<int>();
-            Retry<int> retry2 = new Retry<int>();
-            int result = retry.Run<IndexOutOfRangeException>(
-                () => {
+            Dictionary<Type, Retry<int>.CatchFunction> exCatch =
+                new Dictionary<Type, Retry<int>.CatchFunction>()
+            { { typeof(IndexOutOfRangeException), Catcher } };
+
+            Dictionary<Type, Retry<int>.CatchFunction> exCatch2 =
+                new Dictionary<Type, Retry<int>.CatchFunction>()
+            { { typeof(SqlException), Catcher } };
+
+            Retry<int> retry2 = new Retry<int>(
+                () => Thrower(),
+                exCatch2, 1, 0, 0, "Test2");
+
+            Retry<int> retry = new Retry<int>(
+                () =>
+                {
                     TestContext.WriteLine("Outer Thrower");
-                    retry2.Run<SqlException>(
-                        () => Thrower(),
-                        Catcher, 1, 0, "Test2");
+                    retry2.Run();
                     throw new IndexOutOfRangeException();
                 },
-                Catcher, 5, 0, "Test");
+                exCatch, 5, 0, 0, "Test");
+
+            int result = retry.Run();
             Assert.AreEqual<int>(-1, result);
         }
 
@@ -102,19 +127,22 @@ namespace TryRetryTest
         [TestMethod]
         public void RunOnceStoreResults()
         {
-            Retry<int> retry = new Retry<int>();
-            retry.Run<SqlException>(
+            Dictionary<Type, Retry<int>.CatchFunction> exCatch =
+                new Dictionary<Type, Retry<int>.CatchFunction>()
+            { { typeof(SqlException), Catcher } };
+
+            Retry<int> retry = new Retry<int>(
                 () => Thrower(false),
-                Catcher, 1, 0, "Test3");
-            int result = retry.Run<SqlException>(
+                exCatch, 1, 0, 0, "Test3");
+            Retry<int> retry2 = new Retry<int>(
                 () => Thrower(false),
-                Catcher, 1, 0, "Test3");
-            retry.Run<SqlException>(
-                () => Thrower(false),
-                Catcher, 1, 0, "Test4");
-            int result2 = retry.Run<SqlException>(
-                () => Thrower(false),
-                Catcher, 1, 0, "Test4");
+                exCatch, 1, 0, 0, "Test4");
+
+            retry.Run();
+            int result = retry.Run();
+
+            retry2.Run();
+            int result2 = retry2.Run();
             Assert.AreEqual<int>(result + result2, 2);
         }
 
@@ -124,10 +152,15 @@ namespace TryRetryTest
         [TestMethod]
         public async Task FailedAsync()
         {
-            Retry<int> retry = new Retry<int>();
-            int result = await retry.RunAsync<SqlException>(
+            Dictionary<Type, Retry<int>.CatchFunction> exCatch =
+                new Dictionary<Type, Retry<int>.CatchFunction>()
+            { { typeof(SqlException), Catcher } };
+
+            Retry<int> retry = new Retry<int>(
                 () => Thrower(),
-                Catcher, 5, 100, "test", 5);
+                exCatch, 5, 100, 5, "test");
+
+            int result = await retry.RunAsync();
             Assert.AreEqual<int>(-1, result);
         }
     }
