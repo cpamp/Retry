@@ -74,13 +74,13 @@ namespace Retry.CircuitBreaker
         /// <summary>
         /// Default constructor
         /// </summary>
-        public CircuitBreaker() : this(1, 0) { }
+        public CircuitBreaker() : this(1, 0, 0) { }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="threshold">Circuit threshold.</param>
-        public CircuitBreaker(int threshold) : this(threshold, 0) { }
+        public CircuitBreaker(int threshold) : this(threshold, 0, 0) { }
 
         /// <summary>
         /// Constructor
@@ -88,7 +88,7 @@ namespace Retry.CircuitBreaker
         /// <param name="threshold">Circuit threshold.</param>
         /// <param name="timeout">Time in milliseconds to wait before trying an open circuit.</param>
         /// <param name="halfOpenThreshold">Number of half open attempts are allowed to fail.</param>
-        public CircuitBreaker(int threshold, int timeout, int halfOpenThreshold = -1)
+        public CircuitBreaker(int threshold, int timeout, int halfOpenThreshold)
         {
             FailCount = 0;
             State = CircuitBreakerState.Closed;
@@ -171,18 +171,29 @@ namespace Retry.CircuitBreaker
             State = CircuitBreakerState.HalfOpen;
         }
 
+        private bool IsOpen()
+        {
+            return State == CircuitBreakerState.Open;
+        }
+        
+        private bool CanWait()
+        {
+            bool validHalfOpenThreshold = HalfOpenThreshold > 0 && HalfOpenThreshold > FailedHalfOpenCount;
+            bool goForever = HalfOpenThreshold < 0;
+
+            return IsOpen() && validHalfOpenThreshold || goForever;
+        }
+
         /// <summary>
         /// Handler for state changes.
         /// </summary>
         public void OnStateChanged()
         {
-            if (State == CircuitBreakerState.Open && 
-                HalfOpenThreshold > 0 && 
-                HalfOpenThreshold > FailedHalfOpenCount)
+            if (CanWait())
             {
                 Wait();
             }
-            else if (State == CircuitBreakerState.Open && HalfOpenThreshold < 0 ||
+            else if (IsOpen() && HalfOpenThreshold == 0 ||
                 HalfOpenThreshold <= FailedHalfOpenCount)
             {
                 Running = false;
