@@ -160,6 +160,8 @@ namespace Retry.CircuitBreaker
         public void Reset()
         {
             State = CircuitBreakerState.Closed;
+            FailCount = 0;
+            FailedHalfOpenCount = 0;
         }
 
         /// <summary>
