@@ -87,7 +87,7 @@ namespace Retry
         /// as key and <see cref="CatchFunction"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsToWait">Milliseconds to delay next try.</param>
-        /// <param name="maxWaits">Maximum times to wait.</param>
+        /// <param name="maxWaits">Maximum times to wait. Use 0 for no waits or negative values to go forever.</param>
         public Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunction> exCatch,
             int maxTries, int millisecondsToWait, int maxWaits) :
             this(tryFunc, exCatch, maxTries, millisecondsToWait, maxWaits, null)
@@ -101,7 +101,7 @@ namespace Retry
         /// as key and <see cref="CatchFunction"/> to invoke for that <see cref="Exception"/> as value.</param>
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         /// <param name="millisecondsToWait">Milliseconds to delay next try.</param>
-        /// <param name="maxWaits">Maximum times to wait.</param>
+        /// <param name="maxWaits">Maximum times to wait. Use 0 for no waits or negative values to go forever.</param>
         /// <param name="id">Unique id of to associate with this call.</param>
         public Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunction> exCatch,
             int maxTries, int millisecondsToWait, int maxWaits, string id)
