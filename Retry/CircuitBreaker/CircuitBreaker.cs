@@ -192,7 +192,7 @@ namespace Retry.CircuitBreaker
             bool validHalfOpenThreshold = HalfOpenThreshold > 0 && HalfOpenThreshold > FailedHalfOpenCount;
             bool goForever = HalfOpenThreshold < 0;
 
-            return IsOpen() && validHalfOpenThreshold || goForever;
+            return IsOpen() && validHalfOpenThreshold || IsOpen() && goForever;
         }
 
         /// <summary>
