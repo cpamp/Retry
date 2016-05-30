@@ -171,11 +171,19 @@ namespace Retry.CircuitBreaker
             State = CircuitBreakerState.HalfOpen;
         }
 
+        /// <summary>
+        /// Check if circuit breaker state is open
+        /// </summary>
+        /// <returns>Whether the circuit breaker state is open or not.</returns>
         private bool IsOpen()
         {
             return State == CircuitBreakerState.Open;
         }
         
+        /// <summary>
+        /// Check if the circuit breaker can wait.
+        /// </summary>
+        /// <returns>Whether the circuit breaker can wait or not.</returns>
         private bool CanWait()
         {
             bool validHalfOpenThreshold = HalfOpenThreshold > 0 && HalfOpenThreshold > FailedHalfOpenCount;
