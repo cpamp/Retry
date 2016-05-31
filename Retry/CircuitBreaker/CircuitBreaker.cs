@@ -120,7 +120,7 @@ namespace Retry.CircuitBreaker
                 }
                 catch (Exception e)
                 {
-                    CaughtException(e);
+                    CatchException(e);
                     throw e;
                 }
             }
@@ -136,7 +136,7 @@ namespace Retry.CircuitBreaker
         /// <summary>
         /// Increment fail counter and trip if exceeds threshold.
         /// </summary>
-        public void CaughtException(Exception e)
+        public void CatchException(Exception e)
         {
             LastException = e;
             FailCount++;
