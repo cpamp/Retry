@@ -228,6 +228,10 @@ namespace Retry
                 {
                     System.Diagnostics.Debug.WriteLine("Open Circuit.");
                 }
+                catch (ClosingCircuitException)
+                {
+
+                }
                 catch (Exception e)
                 {
                     result = HandleException(e);

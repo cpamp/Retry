@@ -17,7 +17,59 @@ namespace Retry.CircuitBreaker
         /// <summary>
         /// Lock
         /// </summary>
-        private readonly object thisLock = new object();
+        private static readonly object thisLock = new object();
+
+        /// <summary>
+        /// Last time circuit was tripped open.
+        /// </summary>
+        private DateTime _lastTrip;
+
+        /// <summary>
+        /// Last time circuit was tripped open.
+        /// </summary>
+        private DateTime lastTrip
+        {
+            get
+            {
+                lock (thisLock)
+                {
+                    return _lastTrip;
+                }
+            }
+            set
+            {
+                lock (thisLock)
+                {
+                    _lastTrip = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Time when the circuit breaker should be halfopen.
+        /// </summary>
+        private DateTime _halfOpenTime;
+
+        /// <summary>
+        /// Time when the circuit breaker should be halfopen.
+        /// </summary>
+        private DateTime halfOpenTime
+        {
+            get
+            {
+                lock (thisLock)
+                {
+                    return _halfOpenTime;
+                }
+            }
+            set
+            {
+                lock (thisLock)
+                {
+                    _halfOpenTime = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Last exception which occurred.
@@ -126,6 +178,11 @@ namespace Retry.CircuitBreaker
             }
             else
             {
+                if (halfOpenTime <= DateTime.Now)
+                {
+                    State = CircuitBreakerState.HalfOpen;
+                    throw new ClosingCircuitException();
+                }
                 throw new OpenCircuitException();
             }
 
@@ -156,6 +213,7 @@ namespace Retry.CircuitBreaker
         /// </summary>
         public void Trip()
         {
+            lastTrip = DateTime.Now;
             State = CircuitBreakerState.Open;
         }
 
@@ -165,15 +223,6 @@ namespace Retry.CircuitBreaker
         public void Reset()
         {
             State = CircuitBreakerState.Closed;
-        }
-
-        /// <summary>
-        /// Wait for timeout to continue
-        /// </summary>
-        public async void Wait()
-        {
-            await Task.Delay(Timeout);
-            State = CircuitBreakerState.HalfOpen;
         }
         
         /// <summary>
@@ -197,7 +246,7 @@ namespace Retry.CircuitBreaker
             {
                 if (CanWait())
                 {
-                    Wait();
+                    halfOpenTime = lastTrip.AddMilliseconds(Timeout);
                 }
                 else if (HalfOpenThreshold == 0 ||
                     HalfOpenThreshold <= FailedHalfOpenCount)

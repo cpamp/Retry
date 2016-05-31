@@ -9,4 +9,12 @@ namespace Retry.CircuitBreaker
     {
         public OpenCircuitException() : base("Open Circuit.") { }
     }
+
+    /// <summary>
+    /// Exception thrown when a circuit is closing.
+    /// </summary>
+    public class ClosingCircuitException : Exception
+    {
+        public ClosingCircuitException() : base("Closing Circuit.") { }
+    }
 }
