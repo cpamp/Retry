@@ -153,8 +153,6 @@ namespace Retry
         {
             TResult result = default(TResult);
 
-            circuitBreaker.Reset();
-
             while (circuitBreaker.Running)
             {
                 try
@@ -186,6 +184,7 @@ namespace Retry
             if (Results.CanRun(retryId))
             {
                 result = RunRetry();
+                Results.AddResult(retryId, result);
             }
             else
             {
@@ -207,6 +206,7 @@ namespace Retry
             if (Results.CanRun(retryId))
             {
                 result = await Task.Run(() => RunRetry());
+                Results.AddResult(retryId, result);
             }
             else
             {
