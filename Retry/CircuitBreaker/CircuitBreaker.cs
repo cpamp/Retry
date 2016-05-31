@@ -17,7 +17,7 @@ namespace Retry.CircuitBreaker
         /// <summary>
         /// Lock
         /// </summary>
-        private static readonly object thisLock = new object();
+        private readonly object thisLock = new object();
 
         /// <summary>
         /// Last time circuit was tripped open.
