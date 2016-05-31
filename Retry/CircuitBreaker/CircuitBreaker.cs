@@ -172,7 +172,7 @@ namespace Retry.CircuitBreaker
         /// </summary>
         public async void Wait()
         {
-            await Task.Run(() => { System.Threading.Thread.Sleep(Timeout); });
+            await Task.Delay(Timeout);
             State = CircuitBreakerState.HalfOpen;
         }
         
