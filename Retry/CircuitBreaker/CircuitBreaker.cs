@@ -49,7 +49,13 @@ namespace Retry.CircuitBreaker
         /// </summary>
         public CircuitBreakerState State
         {
-            get { return _state; }
+            get
+            {
+                lock (thisLock)
+                {
+                    return _state;
+                }
+            }
             set
             {
                 lock (thisLock)
