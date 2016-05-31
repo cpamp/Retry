@@ -55,7 +55,7 @@ namespace Retry.CircuitBreaker
                 lock (thisLock)
                 {
                     _state = value;
-                    OnStateChanged();
+                    OnStateChange();
                 }
             }
         }
@@ -91,12 +91,10 @@ namespace Retry.CircuitBreaker
         /// Use 0 to never wait or negative values to go forever.</param>
         public CircuitBreaker(int threshold, int timeout, int halfOpenThreshold)
         {
-            FailCount = 0;
             State = CircuitBreakerState.Closed;
             Threshold = threshold;
             Timeout = timeout;
             HalfOpenThreshold = halfOpenThreshold;
-            Running = true;
         }
         #endregion
 
@@ -161,9 +159,6 @@ namespace Retry.CircuitBreaker
         public void Reset()
         {
             State = CircuitBreakerState.Closed;
-            FailCount = 0;
-            FailedHalfOpenCount = 0;
-            Running = true;
         }
 
         /// <summary>
@@ -173,15 +168,6 @@ namespace Retry.CircuitBreaker
         {
             await Task.Run(() => { System.Threading.Thread.Sleep(Timeout); });
             State = CircuitBreakerState.HalfOpen;
-        }
-
-        /// <summary>
-        /// Check if circuit breaker state is open
-        /// </summary>
-        /// <returns>Whether the circuit breaker state is open or not.</returns>
-        private bool IsOpen()
-        {
-            return State == CircuitBreakerState.Open;
         }
         
         /// <summary>
@@ -193,26 +179,31 @@ namespace Retry.CircuitBreaker
             bool validHalfOpenThreshold = HalfOpenThreshold > 0 && HalfOpenThreshold > FailedHalfOpenCount;
             bool goForever = HalfOpenThreshold < 0;
 
-            return IsOpen() && validHalfOpenThreshold || IsOpen() && goForever;
+            return validHalfOpenThreshold || goForever;
         }
 
         /// <summary>
         /// Handler for state changes.
         /// </summary>
-        public void OnStateChanged()
+        public void OnStateChange()
         {
-            if (CanWait())
+            if (State == CircuitBreakerState.Open)
             {
-                Wait();
-            }
-            else if (IsOpen() && HalfOpenThreshold == 0 ||
-                HalfOpenThreshold <= FailedHalfOpenCount)
-            {
-                Running = false;
+                if (CanWait())
+                {
+                    Wait();
+                }
+                else if (HalfOpenThreshold == 0 ||
+                    HalfOpenThreshold <= FailedHalfOpenCount)
+                {
+                    Running = false;
+                }
             }
             else if (State == CircuitBreakerState.Closed)
             {
                 FailCount = 0;
+                FailedHalfOpenCount = 0;
+                Running = true;
             }
         }
     }
