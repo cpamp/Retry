@@ -11,6 +11,11 @@ namespace Retry
     /// <typeparam name="TResult">Type to be returned.</typeparam>
     public class Retry<TResult>
     {
+        #region DEFAULTS
+        private const int DEFAULT_MAX_TRIES = 1;
+        private const int DEFAULT_MILLISECONDS_WAIT = 0;
+        private const int DEFAULT_MAX_WAITS = 0;
+        #endregion
         /// <summary>
         /// Delegate for catch block function.
         /// </summary>
@@ -36,7 +41,7 @@ namespace Retry
         /// <summary>
         /// The circuit breaker
         /// </summary>
-        private CircuitBreaker<TResult> circuitBreaker;
+        public CircuitBreaker<TResult> CircuitBreaker { get; }
         
         /// <summary>
         /// Collection of results from run once runs.
@@ -51,7 +56,11 @@ namespace Retry
         /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
         /// as key and <see cref="CatchFunction"/> to invoke for that <see cref="Exception"/> as value.</param>
         public Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunction> exCatch) :
-            this(tryFunc, exCatch, 1, 0, 0, null)
+            this(tryFunc, 
+                exCatch,
+                new CircuitBreaker<TResult>(DEFAULT_MAX_TRIES, 
+                    DEFAULT_MILLISECONDS_WAIT, DEFAULT_MAX_WAITS),
+                null)
         { }
 
         /// <summary>
@@ -63,7 +72,10 @@ namespace Retry
         /// <param name="maxTries">Maximum number of times to retry, minimum once.</param>
         public Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunction> exCatch,
             int maxTries) :
-            this(tryFunc, exCatch, maxTries, 0, 0, null)
+            this(tryFunc, 
+                exCatch,
+                new CircuitBreaker<TResult>(maxTries, DEFAULT_MILLISECONDS_WAIT, DEFAULT_MAX_WAITS),
+                null)
         { }
 
         /// <summary>
@@ -76,7 +88,10 @@ namespace Retry
         /// <param name="millisecondsToWait">Milliseconds to delay next try.</param>
         public Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunction> exCatch,
             int maxTries, int millisecondsToWait) :
-            this(tryFunc, exCatch, maxTries, millisecondsToWait, 0, null)
+            this(tryFunc, 
+                exCatch,
+                new CircuitBreaker<TResult>(maxTries, millisecondsToWait, DEFAULT_MAX_WAITS),
+                null)
         { }
 
         /// <summary>
@@ -90,7 +105,10 @@ namespace Retry
         /// <param name="maxWaits">Maximum times to wait. Use 0 for no waits or negative values to go forever.</param>
         public Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunction> exCatch,
             int maxTries, int millisecondsToWait, int maxWaits) :
-            this(tryFunc, exCatch, maxTries, millisecondsToWait, maxWaits, null)
+            this(tryFunc, 
+                exCatch,
+                new CircuitBreaker<TResult>(maxTries, millisecondsToWait, maxWaits),
+                null)
         { }
 
         /// <summary>
@@ -104,13 +122,28 @@ namespace Retry
         /// <param name="maxWaits">Maximum times to wait. Use 0 for no waits or negative values to go forever.</param>
         /// <param name="id">Unique id of to associate with this call.</param>
         public Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunction> exCatch,
-            int maxTries, int millisecondsToWait, int maxWaits, string id)
+            int maxTries, int millisecondsToWait, int maxWaits, string id) :
+                this(tryFunc, 
+                    exCatch, 
+                    new CircuitBreaker<TResult>(maxTries, millisecondsToWait, maxWaits), 
+                    id)
+        { }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="tryFunc">Try code block to execute.</param>
+        /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
+        /// as key and <see cref="CatchFunction"/> to invoke for that <see cref="Exception"/> as value.</param>
+        /// <param name="circuitBreaker">Circuit breaker to use.</param>
+        /// <param name="id">Unique id of to associate with this call.</param>
+        public Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunction> exCatch,
+            CircuitBreaker<TResult> circuitBreaker, string id)
         {
             retryId = id;
             tryFunction = tryFunc;
             exceptionCatchFunctions = exCatch;
-            maxTries = Math.Max(maxTries, 1);
-            circuitBreaker = new CircuitBreaker<TResult>(maxTries, millisecondsToWait, maxWaits);
+            CircuitBreaker = circuitBreaker;
         }
         #endregion
 
@@ -153,11 +186,11 @@ namespace Retry
         {
             TResult result = default(TResult);
 
-            while (circuitBreaker.Running)
+            while (CircuitBreaker.Running)
             {
                 try
                 {
-                    result = circuitBreaker.Execute(tryFunction);
+                    result = CircuitBreaker.Execute(tryFunction);
                 }
                 catch (OpenCircuitException)
                 {
