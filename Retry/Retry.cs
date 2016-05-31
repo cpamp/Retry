@@ -138,7 +138,39 @@ namespace Retry
         /// <param name="circuitBreaker">Circuit breaker to use.</param>
         /// <param name="id">Unique id of to associate with this call.</param>
         public Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunction> exCatch,
-            CircuitBreaker<TResult> circuitBreaker, string id)
+            CircuitBreaker<TResult> circuitBreaker, string id) : 
+            this(tryFunc,
+                exCatch,
+                ref circuitBreaker,
+                id)
+        { }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="tryFunc">Try code block to execute.</param>
+        /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
+        /// as key and <see cref="CatchFunction"/> to invoke for that <see cref="Exception"/> as value.</param>
+        /// <param name="circuitBreaker">Circuit breaker to use.</param>
+        /// <param name="id">Unique id of to associate with this call.</param>
+        public Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunction> exCatch,
+            ref CircuitBreaker<TResult> circuitBreaker) :
+            this(tryFunc,
+                exCatch,
+                ref circuitBreaker,
+                null)
+        { }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="tryFunc">Try code block to execute.</param>
+        /// <param name="exCatch"><see cref="IDictionary{TKey, TValue}"/> containing expected <see cref="Exception"/> <see cref="Type"/> 
+        /// as key and <see cref="CatchFunction"/> to invoke for that <see cref="Exception"/> as value.</param>
+        /// <param name="circuitBreaker">Circuit breaker to use.</param>
+        /// <param name="id">Unique id of to associate with this call.</param>
+        public Retry(Func<TResult> tryFunc, IDictionary<Type, CatchFunction> exCatch,
+            ref CircuitBreaker<TResult> circuitBreaker, string id)
         {
             retryId = id;
             tryFunction = tryFunc;
